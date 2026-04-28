@@ -1,49 +1,104 @@
-# Amazon Ops AI Agent
+# Amazon 广告与 Listing 运营助手
 
-面向亚马逊运营场景的 AI Agent，用于 Listing 优化、广告报表分析、买家邮件回复和产品图片方案生成。
+这是一个给亚马逊日常运营使用的小工具，主要解决几个重复度比较高的工作：广告报表筛选、Listing 文案整理、买家邮件回复和产品图片方案梳理。
 
-## 功能
+项目最初是围绕实际运营流程做的。平时一个 ASIN 会涉及关键词、广告花费、转化、Search Term、竞品卖点和买家消息等信息，如果全部手动看表和整理，效率比较低，也容易因为不同人判断标准不一致导致结论不稳定。这个工具把常规判断规则先固化下来，再把需要生成文案或方案的部分交给模型处理，最后输出可复核、可直接执行的建议。
 
-- Listing 优化：生成标题、五点描述、产品描述、Search Terms 和图片卖点方案。
-- 广告报表分析：根据 CTR、CPC、Spend、Sales、ACOS、ROAS、Orders 等指标识别高花费低转化词、低 ACOS 优质词、需要否定的关键词和预算调整建议。
-- 买家邮件回复：按售后场景生成符合亚马逊沟通规范的英文回复。
-- 图片方案生成：输出主图、场景图、卖点图、尺寸图、对比图等拍摄/设计 brief。
-- 结构化输出：AI 结果以 JSON 为主，便于复核和二次加工。
+## 主要功能
 
-## 快速开始
+### 广告报表分析
+
+支持 CSV / Excel 广告报表，自动计算或读取以下指标：
+
+- CTR
+- CPC
+- Spend
+- Sales
+- ACOS
+- ROAS
+- Orders
+
+目前会重点筛出几类数据：
+
+- 花费高但转化差的搜索词
+- ACOS 较低、值得加预算或单独拉 exact 的关键词
+- 有花费但无订单的否定词候选
+- ROAS 表现较好的预算调整候选
+
+广告分析模块不依赖 API Key，可以直接离线跑。
+
+### Listing 优化
+
+根据产品信息、关键词和竞品备注生成：
+
+- Title
+- Bullet Points
+- Product Description
+- Search Terms
+- 图片卖点方向
+- 合规注意点
+
+### 买家邮件回复
+
+根据售后场景和买家原文生成英文回复，重点控制语气、平台规范和下一步处理动作，避免出现索评、站外联系、补偿换好评等风险表达。
+
+### 图片方案
+
+根据产品卖点生成主图、场景图、功能图、尺寸图、对比图等方向的 brief，方便后续给设计或摄影沟通。
+
+## 技术栈
+
+- Python
+- pandas
+- OpenAI API
+- Pydantic
+- Prompt Engineering
+- JSON 结构化输出
+
+## 安装
 
 ```powershell
-cd D:\新建文件夹\amazon_ops_agent
+git clone https://github.com/Hector-xue/amazon.git
+cd amazon
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 pip install -e .
 ```
 
-配置 OpenAI API Key：
+如果要使用 Listing、邮件和图片方案生成功能，需要配置 OpenAI API Key：
 
 ```powershell
-$env:OPENAI_API_KEY="你的 API Key"
+$env:OPENAI_API_KEY="your_api_key"
 ```
 
-广告报表分析可以不依赖 API Key：
+也可以复制 `.env.example` 为 `.env` 后填写：
+
+```text
+OPENAI_API_KEY=your_api_key
+OPENAI_MODEL=gpt-4.1-mini
+```
+
+## 使用示例
+
+分析广告报表：
 
 ```powershell
 amazon-agent ads --report examples/sample_ads_report.csv --out output/ads_analysis.json
 ```
 
-Listing 优化：
+生成 Listing 优化方案：
 
 ```powershell
 amazon-agent listing --asin B0TEST123 --product examples/product_brief.json --out output/listing_plan.json
 ```
 
-买家邮件回复：
+生成买家邮件回复：
 
 ```powershell
 amazon-agent email --scenario refund_request --message "The item arrived damaged. I want a refund." --out output/email_reply.json
 ```
 
-图片方案生成：
+生成图片方案：
 
 ```powershell
 amazon-agent images --product examples/product_brief.json --out output/image_plan.json
@@ -51,7 +106,7 @@ amazon-agent images --product examples/product_brief.json --out output/image_pla
 
 ## 广告报表字段
 
-脚本会自动兼容常见字段名。建议报表至少包含：
+建议报表至少包含这些字段：
 
 - Campaign
 - Ad Group
@@ -62,28 +117,32 @@ amazon-agent images --product examples/product_brief.json --out output/image_pla
 - Sales
 - Orders
 
-可选字段：
+字段名称不完全一致也可以，程序会兼容一部分常见命名，比如 `Campaign Name`、`Cost`、`7 Day Total Sales` 等。
 
-- CTR
-- CPC
-- ACOS
-- ROAS
+## 项目结构
 
-如果可选字段缺失，系统会自动计算。
-
-## GitHub 上传
-
-当前运行环境没有检测到 `git` 和 GitHub CLI (`gh`) 命令，所以我无法在本机直接完成上传。安装 Git 后可以执行：
-
-```powershell
-cd D:\新建文件夹\amazon_ops_agent
-git init
-git add .
-git commit -m "Initial Amazon ops AI agent"
-git branch -M main
-git remote add origin https://github.com/<your-user>/<your-repo>.git
-git push -u origin main
+```text
+amazon_ops_agent/
+├─ examples/                 # 示例产品信息和广告报表
+├─ scripts/                  # 本地运行和上传脚本
+├─ src/amazon_ops_agent/
+│  ├─ ads_analysis.py        # 广告报表清洗与分类
+│  ├─ ai_client.py           # OpenAI 调用封装
+│  ├─ cli.py                 # 命令行入口
+│  ├─ listing.py             # Listing 优化
+│  ├─ email_reply.py         # 买家邮件回复
+│  ├─ image_plan.py          # 图片方案生成
+│  └─ schemas.py             # 输出结构定义
+└─ tests/
 ```
 
-也可以在 GitHub 网页端新建仓库后，把本目录中的文件上传。
+## 当前状态
+
+这个项目目前偏向内部运营工具，核心逻辑已经可以跑通。后续计划继续补：
+
+- 更细的广告活动层级分析
+- 不同类目的 Listing 模板
+- 批量 ASIN 处理
+- 简单 Web 界面
+- 更多报表格式兼容
 
