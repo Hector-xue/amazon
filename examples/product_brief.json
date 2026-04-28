@@ -1,0 +1,30 @@
+{
+  "asin": "B0TEST123",
+  "marketplace": "US",
+  "product_name": "Stainless Steel Insulated Water Bottle",
+  "brand": "NorthPeak",
+  "category": "Sports & Outdoors",
+  "target_customer": "commuters, hikers, gym users, students",
+  "features": [
+    "24-hour cold retention",
+    "12-hour hot retention",
+    "leakproof lid",
+    "BPA-free materials",
+    "fits most car cup holders"
+  ],
+  "benefits": [
+    "keeps drinks at the right temperature all day",
+    "prevents spills in bags",
+    "easy to carry for outdoor and daily use"
+  ],
+  "keywords": [
+    "insulated water bottle",
+    "stainless steel bottle",
+    "leak proof bottle",
+    "travel water bottle",
+    "sports water bottle"
+  ],
+  "competitor_notes": "Competitors emphasize insulation time and leakproof caps. Few explain cup holder fit and daily commuting use clearly.",
+  "tone": "clear, benefit-focused, compliant, US marketplace English"
+}
+
